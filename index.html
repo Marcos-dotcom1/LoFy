@@ -33,13 +33,6 @@
         --blur: blur(12px);
       }
 
-      .light-theme {
-        --background: #f5f7ff;
-        --card-bg: rgba(255, 255, 255, 0.8);
-        --text: #2d2b55;
-        --text-secondary: #5a577d;
-      }
-
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         overflow-x: hidden;
@@ -834,9 +827,6 @@
 
     <div class="container">
       <div class="header">
-        <button class="theme-toggle" id="themeToggle">
-          <i class="fas fa-moon"></i>
-        </button>
         <h1 class="title">🎧 LoFy</h1>
         <p class="subtitle">Your personal relaxation and focus space</p>
       </div>
@@ -1030,17 +1020,6 @@
         ];
         return colors[Math.floor(Math.random() * colors.length)];
       }
-
-      // Theme Toggle
-      document.getElementById("themeToggle").addEventListener("click", () => {
-        document.body.classList.toggle("light-theme");
-        const icon = document.querySelector("#themeToggle i");
-        if (document.body.classList.contains("light-theme")) {
-          icon.className = "fas fa-sun";
-        } else {
-          icon.className = "fas fa-moon";
-        }
-      });
 
       // Ambient Sound System
       class AmbientSounds {
