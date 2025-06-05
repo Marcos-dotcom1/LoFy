@@ -248,6 +248,7 @@
         justify-content: center;
         width: 100%;
         max-width: 1200px;
+        position: relative;
       }
 
       /* Control Panel */
@@ -261,9 +262,14 @@
         min-width: 300px;
         max-width: 500px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        position: fixed;
+        left: 2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        z-index: 100;
       }
 
-      /* Timer Section */
       .timer-section {
         background: var(--card-bg);
         backdrop-filter: var(--blur);
@@ -275,6 +281,74 @@
         max-width: 500px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         text-align: center;
+        position: fixed;
+        right: 2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        z-index: 100;
+      }
+
+      .panel-toggle {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--primary);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+        z-index: 101;
+      }
+
+      .control-panel .panel-toggle {
+        right: -20px;
+      }
+
+      .timer-section .panel-toggle {
+        left: -20px;
+      }
+
+      .panel-toggle:hover {
+        background: var(--primary-light);
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .control-panel.collapsed {
+        transform: translate(-100%, -50%);
+      }
+
+      .timer-section.collapsed {
+        transform: translate(100%, -50%);
+      }
+
+      .panel-toggle i {
+        transition: transform 0.3s ease;
+      }
+
+      .control-panel.collapsed .panel-toggle i {
+        transform: rotate(180deg);
+      }
+
+      .timer-section.collapsed .panel-toggle i {
+        transform: rotate(180deg);
+      }
+
+      .panel-content {
+        transition: opacity 0.3s ease;
+      }
+
+      .control-panel.collapsed .panel-content,
+      .timer-section.collapsed .panel-content {
+        opacity: 0;
+        pointer-events: none;
       }
 
       .timer-display {
@@ -694,8 +768,37 @@
 
         .control-panel,
         .timer-section {
-          width: 100%;
-          max-width: 100%;
+          position: fixed;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 90%;
+          max-width: 500px;
+        }
+
+        .control-panel {
+          top: 20%;
+        }
+
+        .timer-section {
+          top: 70%;
+        }
+
+        .control-panel.collapsed {
+          transform: translate(-150%, -50%);
+        }
+
+        .timer-section.collapsed {
+          transform: translate(150%, -50%);
+        }
+
+        .panel-toggle {
+          top: auto;
+          bottom: -20px;
+          transform: none;
+        }
+
+        .panel-toggle:hover {
+          transform: scale(1.1);
         }
 
         .timer-display {
@@ -739,117 +842,129 @@
       </div>
 
       <div class="main-content">
-        <div class="control-panel">
-          <div class="ambient-section">
-            <h3 class="section-title">Ambient Sounds</h3>
-            <div class="ambient-controls">
-              <button class="ambient-btn" data-sound="rain">
-                <i class="fas fa-cloud-rain"></i>
-                <span>Rain</span>
-              </button>
-              <button class="ambient-btn" data-sound="vinyl">
-                <i class="fas fa-record-vinyl"></i>
-                <span>Vinyl</span>
-              </button>
-              <button class="ambient-btn" data-sound="waves">
-                <i class="fas fa-water"></i>
-                <span>Waves</span>
-              </button>
-              <button class="ambient-btn" data-sound="forest">
-                <i class="fas fa-tree"></i>
-                <span>Forest</span>
-              </button>
+        <div class="control-panel" id="controlPanel">
+          <button class="panel-toggle" id="controlPanelToggle">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          <div class="panel-content">
+            <div class="ambient-section">
+              <h3 class="section-title">Ambient Sounds</h3>
+              <div class="ambient-controls">
+                <button class="ambient-btn" data-sound="rain">
+                  <i class="fas fa-cloud-rain"></i>
+                  <span>Rain</span>
+                </button>
+                <button class="ambient-btn" data-sound="vinyl">
+                  <i class="fas fa-record-vinyl"></i>
+                  <span>Vinyl</span>
+                </button>
+                <button class="ambient-btn" data-sound="waves">
+                  <i class="fas fa-water"></i>
+                  <span>Waves</span>
+                </button>
+                <button class="ambient-btn" data-sound="forest">
+                  <i class="fas fa-tree"></i>
+                  <span>Forest</span>
+                </button>
+              </div>
+              <div class="volume-control">
+                <i class="fas fa-volume-up volume-icon"></i>
+                <input
+                  type="range"
+                  class="volume-slider"
+                  id="ambientVolume"
+                  min="0"
+                  max="100"
+                  value="30"
+                />
+              </div>
             </div>
-            <div class="volume-control">
-              <i class="fas fa-volume-up volume-icon"></i>
-              <input
-                type="range"
-                class="volume-slider"
-                id="ambientVolume"
-                min="0"
-                max="100"
-                value="30"
-              />
+
+            <div class="visualizer-container">
+              <h3 class="visualizer-title">Sound Visualizer</h3>
+              <div class="visualizer" id="visualizer"></div>
             </div>
-          </div>
 
-          <div class="visualizer-container">
-            <h3 class="visualizer-title">Sound Visualizer</h3>
-            <div class="visualizer" id="visualizer"></div>
-          </div>
+            <div class="spotify-section">
+              <h3 class="section-title">Your Music</h3>
+              <button class="spotify-btn" id="spotifyConnect">
+                <i class="fab fa-spotify"></i>
+                Connect Spotify
+              </button>
+              <div class="status" id="status"></div>
 
-          <div class="spotify-section">
-            <h3 class="section-title">Your Music</h3>
-            <button class="spotify-btn" id="spotifyConnect">
-              <i class="fab fa-spotify"></i>
-              Connect Spotify
-            </button>
-            <div class="status" id="status"></div>
-
-            <div class="now-playing" id="nowPlaying">
-              <div class="track-info">
-                <img class="album-art" id="albumArt" src="" alt="Album Art" />
-                <div class="track-details">
-                  <h3 id="trackName">Chill Vibes</h3>
-                  <p id="artistName">Lofi Artist</p>
+              <div class="now-playing" id="nowPlaying">
+                <div class="track-info">
+                  <img class="album-art" id="albumArt" src="" alt="Album Art" />
+                  <div class="track-details">
+                    <h3 id="trackName">Chill Vibes</h3>
+                    <p id="artistName">Lofi Artist</p>
+                  </div>
                 </div>
-              </div>
 
-              <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-              </div>
-              <div class="time-info">
-                <span id="currentTime">0:00</span>
-                <span id="totalTime">3:45</span>
-              </div>
+                <div class="progress-container">
+                  <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="time-info">
+                  <span id="currentTime">0:00</span>
+                  <span id="totalTime">3:45</span>
+                </div>
 
-              <div class="music-controls">
-                <button class="control-btn" id="prevBtn">
-                  <i class="fas fa-step-backward"></i>
-                </button>
-                <button class="control-btn play-btn" id="playBtn">
-                  <i class="fas fa-play" id="playIcon"></i>
-                </button>
-                <button class="control-btn" id="nextBtn">
-                  <i class="fas fa-step-forward"></i>
-                </button>
+                <div class="music-controls">
+                  <button class="control-btn" id="prevBtn">
+                    <i class="fas fa-step-backward"></i>
+                  </button>
+                  <button class="control-btn play-btn" id="playBtn">
+                    <i class="fas fa-play" id="playIcon"></i>
+                  </button>
+                  <button class="control-btn" id="nextBtn">
+                    <i class="fas fa-step-forward"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="timer-section">
-          <h3 class="section-title">Focus Timer</h3>
-          <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="timer-section" id="timerSection">
+          <button class="panel-toggle" id="timerSectionToggle">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="panel-content">
+            <h3 class="section-title">Focus Timer</h3>
+            <div class="timer-display" id="timerDisplay">25:00</div>
 
-          <div class="timer-controls">
-            <button class="timer-btn" id="startTimer">
-              <i class="fas fa-play"></i> Start
-            </button>
-            <button class="timer-btn" id="pauseTimer" disabled>
-              <i class="fas fa-pause"></i> Pause
-            </button>
-            <button class="timer-btn" id="resetTimer">
-              <i class="fas fa-redo"></i> Reset
-            </button>
-          </div>
+            <div class="timer-controls">
+              <button class="timer-btn" id="startTimer">
+                <i class="fas fa-play"></i> Start
+              </button>
+              <button class="timer-btn" id="pauseTimer" disabled>
+                <i class="fas fa-pause"></i> Pause
+              </button>
+              <button class="timer-btn" id="resetTimer">
+                <i class="fas fa-redo"></i> Reset
+              </button>
+            </div>
 
-          <div class="timer-presets">
-            <button class="preset-btn" data-minutes="25">Pomodoro (25m)</button>
-            <button class="preset-btn" data-minutes="15">
-              Short Break (15m)
-            </button>
-            <button class="preset-btn" data-minutes="5">
-              Quick Break (5m)
-            </button>
-            <button class="preset-btn" data-minutes="50">
-              Deep Work (50m)
-            </button>
-          </div>
+            <div class="timer-presets">
+              <button class="preset-btn" data-minutes="25">
+                Pomodoro (25m)
+              </button>
+              <button class="preset-btn" data-minutes="15">
+                Short Break (15m)
+              </button>
+              <button class="preset-btn" data-minutes="5">
+                Quick Break (5m)
+              </button>
+              <button class="preset-btn" data-minutes="50">
+                Deep Work (50m)
+              </button>
+            </div>
 
-          <div class="visualizer-container">
-            <h3 class="visualizer-title">Current Time</h3>
-            <div class="timer-display" id="clockDisplay">00:00:00</div>
+            <div class="visualizer-container">
+              <h3 class="visualizer-title">Current Time</h3>
+              <div class="timer-display" id="clockDisplay">00:00:00</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1374,6 +1489,19 @@
       const ambientSounds = new AmbientSounds();
       const spotifyController = new SpotifyController();
       const timer = new Timer();
+
+      // Panel Toggles
+      document
+        .getElementById("controlPanelToggle")
+        .addEventListener("click", () => {
+          document.getElementById("controlPanel").classList.toggle("collapsed");
+        });
+
+      document
+        .getElementById("timerSectionToggle")
+        .addEventListener("click", () => {
+          document.getElementById("timerSection").classList.toggle("collapsed");
+        });
 
       // Event Listeners
       document.addEventListener("DOMContentLoaded", () => {
