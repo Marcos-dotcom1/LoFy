@@ -1005,6 +1005,478 @@
         return true;
       }
 
+      // Ambient Sound System
+      class AmbientSounds {
+        constructor() {
+          this.sounds = {};
+          this.currentSound = null;
+          this.volume = 0.3;
+          this.visualizerInterval = null;
+          this.initSounds();
+        }
+
+        initSounds() {
+          // Create audio contexts for different sounds
+          this.sounds.rain = this.createRainSound();
+          this.sounds.vinyl = this.createVinylSound();
+          this.sounds.waves = this.createWavesSound();
+          this.sounds.forest = this.createForestSound();
+        }
+
+        createRainSound() {
+          const audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const gainNode = audioContext.createGain();
+          gainNode.connect(audioContext.destination);
+          gainNode.gain.value = this.volume;
+
+          // Generate pink noise for rain effect
+          const bufferSize = audioContext.sampleRate * 2;
+          const buffer = audioContext.createBuffer(
+            1,
+            bufferSize,
+            audioContext.sampleRate
+          );
+          const data = buffer.getChannelData(0);
+
+          let b0 = 0,
+            b1 = 0,
+            b2 = 0,
+            b3 = 0,
+            b4 = 0,
+            b5 = 0,
+            b6 = 0;
+          for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.969 * b2 + white * 0.153852;
+            b3 = 0.8665 * b3 + white * 0.3104856;
+            b4 = 0.55 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.016898;
+            data[i] =
+              (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+            b6 = white * 0.115926;
+          }
+
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+          source.connect(gainNode);
+
+          return { audioContext, source, gainNode, started: false };
+        }
+
+        createVinylSound() {
+          const audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const gainNode = audioContext.createGain();
+          gainNode.connect(audioContext.destination);
+          gainNode.gain.value = this.volume * 0.5;
+
+          // Generate vinyl crackle
+          const bufferSize = audioContext.sampleRate * 4;
+          const buffer = audioContext.createBuffer(
+            1,
+            bufferSize,
+            audioContext.sampleRate
+          );
+          const data = buffer.getChannelData(0);
+
+          for (let i = 0; i < bufferSize; i++) {
+            if (Math.random() > 0.98) {
+              data[i] = (Math.random() * 2 - 1) * 0.3;
+            } else {
+              data[i] = (Math.random() * 2 - 1) * 0.05;
+            }
+          }
+
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+          source.connect(gainNode);
+
+          return { audioContext, source, gainNode, started: false };
+        }
+
+        createWavesSound() {
+          const audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const gainNode = audioContext.createGain();
+          gainNode.connect(audioContext.destination);
+          gainNode.gain.value = this.volume * 0.6;
+
+          // Create brown noise for waves
+          const bufferSize = audioContext.sampleRate * 4;
+          const buffer = audioContext.createBuffer(
+            1,
+            bufferSize,
+            audioContext.sampleRate
+          );
+          const data = buffer.getChannelData(0);
+
+          let lastOut = 0.0;
+          for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            const output = (lastOut + 0.02 * white) / 1.02;
+            lastOut = output;
+            data[i] = output * 3.5;
+          }
+
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+          source.connect(gainNode);
+
+          return { audioContext, source, gainNode, started: false };
+        }
+
+        createForestSound() {
+          const audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const gainNode = audioContext.createGain();
+          gainNode.connect(audioContext.destination);
+          gainNode.gain.value = this.volume * 0.7;
+
+          // Create nature sounds with random bird chirps
+          const bufferSize = audioContext.sampleRate * 8;
+          const buffer = audioContext.createBuffer(
+            1,
+            bufferSize,
+            audioContext.sampleRate
+          );
+          const data = buffer.getChannelData(0);
+
+          // Background nature sound (lower frequency noise)
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.1;
+          }
+
+          // Add bird chirps randomly
+          for (let i = 0; i < 20; i++) {
+            const position = Math.floor(Math.random() * bufferSize);
+            const duration = Math.floor(Math.random() * 1000) + 500;
+            const freq = 800 + Math.random() * 1000;
+
+            for (let j = 0; j < duration; j++) {
+              if (position + j < bufferSize) {
+                const t = j / audioContext.sampleRate;
+                const chirp =
+                  Math.sin(2 * Math.PI * freq * t) *
+                  Math.exp(-4 * t) *
+                  (0.5 + 0.5 * Math.sin(2 * Math.PI * 8 * t));
+                data[position + j] += chirp * 0.3;
+              }
+            }
+          }
+
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+          source.connect(gainNode);
+
+          return { audioContext, source, gainNode, started: false };
+        }
+
+        play(soundName) {
+          if (this.currentSound && this.currentSound !== soundName) {
+            this.stop();
+          }
+
+          const sound = this.sounds[soundName];
+          if (sound && !sound.started) {
+            sound.source.start();
+            sound.started = true;
+            this.currentSound = soundName;
+
+            // Start visualizer animation when sound plays
+            if (this.visualizerInterval) clearInterval(this.visualizerInterval);
+            this.visualizerInterval = setInterval(updateVisualizer, 100);
+          }
+        }
+
+        stop() {
+          if (this.currentSound) {
+            const sound = this.sounds[this.currentSound];
+            if (sound && sound.started) {
+              sound.source.stop();
+              // Recreate the sound for next use
+              if (this.currentSound === "rain") {
+                this.sounds.rain = this.createRainSound();
+              } else if (this.currentSound === "vinyl") {
+                this.sounds.vinyl = this.createVinylSound();
+              } else if (this.currentSound === "waves") {
+                this.sounds.waves = this.createWavesSound();
+              } else if (this.currentSound === "forest") {
+                this.sounds.forest = this.createForestSound();
+              }
+            }
+            this.currentSound = null;
+
+            // Stop visualizer animation
+            if (this.visualizerInterval) {
+              clearInterval(this.visualizerInterval);
+              this.visualizerInterval = null;
+            }
+          }
+        }
+
+        setVolume(volume) {
+          this.volume = volume;
+          Object.values(this.sounds).forEach((sound) => {
+            if (sound.gainNode) {
+              sound.gainNode.gain.value =
+                volume *
+                (sound === this.sounds.vinyl
+                  ? 0.5
+                  : sound === this.sounds.waves
+                  ? 0.6
+                  : sound === this.sounds.forest
+                  ? 0.7
+                  : 1);
+            }
+          });
+        }
+      }
+
+      // Spotify Integration
+      class SpotifyController {
+        constructor() {
+          this.connected = false;
+          this.currentTrack = null;
+          this.isPlaying = false;
+          this.trackProgress = 0;
+          this.trackDuration = 225; // 3:45 in seconds
+          this.progressInterval = null;
+          this.accessToken = localStorage.getItem("spotify_access_token");
+        }
+
+        async connect() {
+          if (!this.accessToken) {
+            throw new Error("No access token available");
+          }
+
+          try {
+            // Get user profile to verify token
+            const response = await fetch("https://api.spotify.com/v1/me", {
+              headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+              },
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to connect to Spotify");
+            }
+
+            this.connected = true;
+            await this.getCurrentTrack();
+            return true;
+          } catch (error) {
+            console.error("Spotify connection error:", error);
+            throw error;
+          }
+        }
+
+        async getCurrentTrack() {
+          try {
+            const response = await fetch(
+              "https://api.spotify.com/v1/me/player/currently-playing",
+              {
+                headers: {
+                  Authorization: `Bearer ${this.accessToken}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              this.currentTrack = {
+                name: data.item.name,
+                artist: data.item.artists[0].name,
+                album_art: data.item.album.images[0].url,
+                duration: Math.floor(data.item.duration_ms / 1000),
+              };
+              this.trackDuration = this.currentTrack.duration;
+              this.trackProgress = Math.floor(data.progress_ms / 1000);
+              this.isPlaying = data.is_playing;
+              this.updateNowPlaying();
+            }
+          } catch (error) {
+            console.error("Error getting current track:", error);
+          }
+        }
+
+        async play() {
+          try {
+            await fetch("https://api.spotify.com/v1/me/player/play", {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+              },
+            });
+            this.isPlaying = true;
+            this.startProgressUpdate();
+          } catch (error) {
+            console.error("Error playing track:", error);
+          }
+        }
+
+        async pause() {
+          try {
+            await fetch("https://api.spotify.com/v1/me/player/pause", {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+              },
+            });
+            this.isPlaying = false;
+            if (this.progressInterval) {
+              clearInterval(this.progressInterval);
+            }
+          } catch (error) {
+            console.error("Error pausing track:", error);
+          }
+        }
+
+        async next() {
+          try {
+            await fetch("https://api.spotify.com/v1/me/player/next", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+              },
+            });
+            await this.getCurrentTrack();
+          } catch (error) {
+            console.error("Error skipping to next track:", error);
+          }
+        }
+
+        async previous() {
+          try {
+            await fetch("https://api.spotify.com/v1/me/player/previous", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+              },
+            });
+            await this.getCurrentTrack();
+          } catch (error) {
+            console.error("Error going to previous track:", error);
+          }
+        }
+
+        startProgressUpdate() {
+          if (this.progressInterval) {
+            clearInterval(this.progressInterval);
+          }
+          this.progressInterval = setInterval(async () => {
+            if (this.isPlaying) {
+              this.trackProgress++;
+              if (this.trackProgress >= this.trackDuration) {
+                await this.getCurrentTrack();
+              } else {
+                this.updateNowPlaying();
+              }
+            }
+          }, 1000);
+        }
+
+        updateNowPlaying() {
+          if (this.currentTrack) {
+            document.getElementById("trackName").textContent =
+              this.currentTrack.name;
+            document.getElementById("artistName").textContent =
+              this.currentTrack.artist;
+            document.getElementById("albumArt").src =
+              this.currentTrack.album_art;
+            document.getElementById("playIcon").className = this.isPlaying
+              ? "fas fa-pause"
+              : "fas fa-play";
+
+            // Update progress bar
+            const progressPercent =
+              (this.trackProgress / this.trackDuration) * 100;
+            document.getElementById("progressBar").style.width =
+              progressPercent + "%";
+
+            // Update time display
+            document.getElementById("currentTime").textContent =
+              this.formatTime(this.trackProgress);
+            document.getElementById("totalTime").textContent = this.formatTime(
+              this.trackDuration
+            );
+          }
+        }
+
+        formatTime(seconds) {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+        }
+      }
+
+      // Timer System
+      class Timer {
+        constructor() {
+          this.minutes = 25;
+          this.seconds = 0;
+          this.interval = null;
+          this.isRunning = false;
+          this.totalSeconds = this.minutes * 60;
+        }
+
+        start() {
+          if (this.isRunning) return;
+
+          this.isRunning = true;
+          this.interval = setInterval(() => {
+            if (this.totalSeconds > 0) {
+              this.totalSeconds--;
+              this.updateDisplay();
+            } else {
+              this.stop();
+              // Play completion sound
+              new Audio(
+                "https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"
+              ).play();
+            }
+          }, 1000);
+        }
+
+        pause() {
+          if (!this.isRunning) return;
+
+          this.isRunning = false;
+          clearInterval(this.interval);
+        }
+
+        stop() {
+          this.isRunning = false;
+          clearInterval(this.interval);
+        }
+
+        reset() {
+          this.stop();
+          this.totalSeconds = this.minutes * 60;
+          this.updateDisplay();
+        }
+
+        setTime(minutes) {
+          this.minutes = minutes;
+          this.totalSeconds = minutes * 60;
+          this.updateDisplay();
+        }
+
+        updateDisplay() {
+          const mins = Math.floor(this.totalSeconds / 60);
+          const secs = this.totalSeconds % 60;
+          document.getElementById("timerDisplay").textContent = `${
+            mins < 10 ? "0" : ""
+          }${mins}:${secs < 10 ? "0" : ""}${secs}`;
+        }
+      }
+
       // Initialize the application
       function initializeApp() {
         const ambientSounds = new AmbientSounds();
