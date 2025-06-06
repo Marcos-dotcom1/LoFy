@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoFy - Login</title>
+    <link rel="icon" type="image/jpg" href="/public/images/Favicon.jpg" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #8a2be2;
+        --primary-light: #a45bff;
+        --primary-dark: #6a1bb9;
+        --secondary: #1db954;
+        --background: #0a0a0a;
+        --card-bg: rgba(25, 20, 40, 0.7);
+        --text: #ffffff;
+        --text-secondary: #d0d0d0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .login-container {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+
+      .logo {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .title {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        color: var(--text-secondary);
+      }
+
+      .spotify-login-btn {
+        background: var(--secondary);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        font-weight: 600;
+      }
+
+      .spotify-login-btn:hover {
+        background: #1ed760;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.5);
+      }
+
+      .loading {
+        display: none;
+        margin-top: 1rem;
+        color: var(--text-secondary);
+      }
+
+      .loading.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="logo">🎧 LoFy</div>
+      <h1 class="title">Your personal relaxation and focus space</h1>
+      <button class="spotify-login-btn" id="loginBtn">
+        <i class="fab fa-spotify"></i>
+        Login with Spotify
+      </button>
+      <div class="loading" id="loading">
+        <i class="fas fa-spinner fa-spin"></i> Connecting to Spotify...
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("loginBtn").addEventListener("click", () => {
+        document.getElementById("loading").classList.add("active");
+
+        // Spotify OAuth configuration
+        const clientId = "YOUR_SPOTIFY_CLIENT_ID"; // Replace with your Spotify Client ID
+        const redirectUri = window.location.origin + "/index.html";
+        const scopes = [
+          "user-read-private",
+          "user-read-email",
+          "user-read-playback-state",
+          "user-modify-playback-state",
+          "user-read-currently-playing",
+          "streaming",
+        ].join(" ");
+
+        // Construct Spotify authorization URL
+        const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
+          redirectUri
+        )}&scope=${encodeURIComponent(scopes)}&show_dialog=true`;
+
+        // Redirect to Spotify login
+        window.location.href = authUrl;
+      });
+    </script>
+  </body>
+</html>
