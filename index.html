@@ -1552,6 +1552,34 @@
           updateClock();
           setInterval(updateClock, 1000);
 
+          // Panel collapse functionality
+          const controlPanel = document.getElementById("controlPanel");
+          const timerSection = document.getElementById("timerSection");
+          const controlPanelToggle =
+            document.getElementById("controlPanelToggle");
+          const timerSectionToggle =
+            document.getElementById("timerSectionToggle");
+
+          controlPanelToggle.addEventListener("click", () => {
+            controlPanel.classList.toggle("collapsed");
+            controlPanelToggle
+              .querySelector("i")
+              .classList.toggle("fa-chevron-right");
+            controlPanelToggle
+              .querySelector("i")
+              .classList.toggle("fa-chevron-left");
+          });
+
+          timerSectionToggle.addEventListener("click", () => {
+            timerSection.classList.toggle("collapsed");
+            timerSectionToggle
+              .querySelector("i")
+              .classList.toggle("fa-chevron-left");
+            timerSectionToggle
+              .querySelector("i")
+              .classList.toggle("fa-chevron-right");
+          });
+
           // Ambient sound controls
           document.querySelectorAll(".ambient-btn").forEach((btn) => {
             btn.addEventListener("click", () => {
