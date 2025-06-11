@@ -998,15 +998,9 @@
       // Check if user is authenticated
       function checkAuth() {
         const token = localStorage.getItem("spotify_access_token");
-        if (!token) {
-          window.location.href = "/login.html";
-          return false;
-        }
-        return true;
+        return token ? true : false;
       }
 
-<<<<<<< HEAD
-=======
       // Update visualizer bars
       function updateVisualizer() {
         const bars = document.querySelectorAll(".bar");
@@ -1032,7 +1026,6 @@
         return colors[Math.floor(Math.random() * colors.length)];
       }
 
->>>>>>> acafcca (removed lightmode)
       // Ambient Sound System
       class AmbientSounds {
         constructor() {
@@ -1541,31 +1534,6 @@
           }
         }
 
-        // Update visualizer bars
-        function updateVisualizer() {
-          const bars = document.querySelectorAll(".bar");
-          bars.forEach((bar) => {
-            const newHeight = Math.random() * 80 + 20;
-            bar.style.height = newHeight + "px";
-            bar.style.background = `linear-gradient(to top, var(--primary), ${getRandomColor()})`;
-          });
-        }
-
-        // Generate random color for visualizer
-        function getRandomColor() {
-          const colors = [
-            "#ff9a9e",
-            "#fad0c4",
-            "#fbc2eb",
-            "#a6c1ee",
-            "#8EC5FC",
-            "#E0C3FC",
-            "#a1c4fd",
-            "#c2e9fb",
-          ];
-          return colors[Math.floor(Math.random() * colors.length)];
-        }
-
         // Clock System
         function updateClock() {
           const now = new Date();
@@ -1702,8 +1670,9 @@
       // Start the application if authenticated
       if (checkAuth()) {
         handleSpotifyAuth();
-        initializeApp();
       }
+      // Initialize the app regardless of authentication
+      initializeApp();
     </script>
   </body>
 </html>
